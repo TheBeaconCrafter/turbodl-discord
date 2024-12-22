@@ -25,6 +25,11 @@ BASE_DIR = os.getcwd()
 UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
 
 class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # Set Content-Disposition header for download
+        self.send_header("Content-Disposition", f'attachment; filename="{self.path.split("/")[-1]}"')
+        super().end_headers()
+
     def copyfile(self, source, outputfile):
         try:
             super().copyfile(source, outputfile)
@@ -36,7 +41,7 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
 def start_server():
     os.makedirs(UPLOADS_DIR, exist_ok=True)
     os.chdir(UPLOADS_DIR)
-    server = HTTPServer(('0.0.0.0', PORT), CustomHTTPRequestHandler)
+    server = HTTPServer(('0.0.0.0', int(PORT)), CustomHTTPRequestHandler)
     server.serve_forever()
 
 # Start the web server in a separate daemon thread
